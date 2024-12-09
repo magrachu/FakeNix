@@ -1,3 +1,11 @@
+// debug defines
+#define ARDUINOHA_DEBUG
+
+#define DATA_PIN_LED_INTERNAL 2
+#define NUM_LEDS_INTERNAL 1
+#define MAC_ADDRESS_SIZE 6
+#define DEVICE_IDENTIFIER_SUFFIX_LENGTH 8
+
 #include <Arduino.h>
 #include <WiFiUdp.h>
 
@@ -5,6 +13,7 @@
 #include <NTPClient.h>
 #include <ArduinoHA.h>
 #include <ESPmDNS.h>
+
 
 #include <Preferences.h>
 
@@ -18,10 +27,10 @@
 
 WiFiUDP ntpUDP;
 
-#define DATA_PIN_LED_INTERNAL 2
 
-#define NUM_LEDS_INTERNAL 1
+
 CRGB internalLed[NUM_LEDS_INTERNAL];
+char deviceIdentifierSuffix[DEVICE_IDENTIFIER_SUFFIX_LENGTH];
 
 // By default 'pool.ntp.org' is used with 60 seconds update interval and
 // no offset
@@ -29,13 +38,20 @@ NTPClient timeClient(ntpUDP, 3600);
 
 void setup()
 {
+  // determine device ID by using the last two bytes of the mac address
+  byte macAddress[MAC_ADDRESS_SIZE];
+  WiFi.macAddress(macAddress);
+  snprintf(deviceIdentifierSuffix,DEVICE_IDENTIFIER_SUFFIX_LENGTH,"0b%x%x",macAddress[MAC_ADDRESS_SIZE-2],macAddress[MAC_ADDRESS_SIZE-1]);
+  
+  
   Serial.begin(115200);
   delay(5000);
   
   Serial.println("Elekstube-R");
+
   DisplayLED.setup();
   DisplayLED.clear();
-  SettingsManager.setup();
+  SettingsManager.setup(deviceIdentifierSuffix);
   SettingsManager.load();
   SettingsManager.printToSerial();
 
@@ -57,12 +73,16 @@ void setup()
     OTAManager.setup();
     MQTTManager.setup();
     MQTTManager.connect(S_MQTT_ADDR, S_MQTT_USER, S_MQTT_PASS);
+
+
+  
     break;
   default:
     break;
   }
 
   FastLED.show();
+
 
   
 
@@ -90,7 +110,7 @@ void loop()
     MQTTManager.tick();
     OTAManager.tick();
     timeClient.update();
-
+  
     // Serial.println(timeClient.getFormattedTime());
 
     DisplayLED.SetTimeHMS(hours, minutes, seconds);

@@ -72,6 +72,8 @@ void WifiManager_::begin()
         numNetworks = WiFi.scanNetworks();
         ssid = AP_SSID_BASE + macSuffix;
         password = AP_PASS_BASE + String(ApPasscode);
+        Serial.println("AP SSID: " + ssid);
+        Serial.println("AP PW: "+password);
         WiFi.softAP(ssid, password);
         currentWifiMode = WIFIMANAGER_MODE_AP;
         break;

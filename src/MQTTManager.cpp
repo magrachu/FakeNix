@@ -2,7 +2,10 @@
 #include <ArduinoHA.h>
 #include <DisplayLED.h>
 #include <WiFi.h>
-#include <HAMqtt.h>
+#include <SettingsManager.h>
+#include <ESPmDNS.h>
+
+
 
 WiFiClient espWifiClient;
 
@@ -10,6 +13,10 @@ HADevice device("Elekstube-R");
 HAMqtt mqtt(espWifiClient, device);
 HALight light("digitLight", HALight::BrightnessFeature | HALight::ColorTemperatureFeature | HALight::RGBFeature);
 int tickCounter = 0;
+char _username[MQTT_STRING_LENGTH];
+char _password[MQTT_STRING_LENGTH];
+char _hostname[MQTT_STRING_LENGTH];
+char _configURL[MQTT_STRING_LENGTH]= "http://";
 
 MQTTManager_ &MQTTManager_::getInstance()
 {
@@ -60,15 +67,21 @@ void MQTTManager_::setup()
     chUniqueId[10 + i] = mac[2 + i];
   }
   chUniqueId[14] = 0;
-
+  Serial.println(mqtt.getDataPrefix());
+  mqtt.setDataPrefix("FakeNixie");
   mqtt.setDiscoveryPrefix("homeassistant");
   device.enableExtendedUniqueIds();
   device.setUniqueId(mac, sizeof(mac));
   device.setName("Fake Nixie Clock");
   device.setSoftwareVersion("0.0.1");
   device.setManufacturer("magrachu");
-  device.setModel("Elekstube-R ESP32");
-  device.setConfigurationUrl("http://192.168.2.55:1234");
+  device.setModel("FakeNixie");
+ 
+  strcat(_configURL,WiFi.localIP().toString().c_str());
+  device.setConfigurationUrl(_configURL);
+  Serial.print("cu: ");
+  Serial.println(_configURL);
+  //device.setConfigurationUrl("httpeeee:////");
   Serial.println(device.getUniqueId());
   device.enableSharedAvailability();
   device.enableLastWill();
@@ -81,56 +94,60 @@ void MQTTManager_::setup()
 
 void MQTTManager_::connect(String servername, String username, String password)
 {
-  
-  Serial.print("Connect to: ");
-  Serial.println(servername.c_str());
-  mqtt.begin(servername.c_str(), username.c_str(), password.c_str());
+
+  // copy the credentials into char arrays locally because the arduinoHA library does only reference them
+  strcpy(_hostname, servername.c_str());
+  strcpy(_username, username.c_str());
+  strcpy(_password, password.c_str());
+
+  mqtt.begin(_hostname, _username, _password);
+
+
 }
 
 void MQTTManager_::tick()
 {
   mqtt.loop();
-  tickCounter += 1;
-  if (tickCounter > 100)
-  {
-    tickCounter = 0;
-    switch (mqtt.getState())
-    {
-    case -5:
-      Serial.println("MQTT State: StateConnecting");
-      break;
-    case -4:
-      Serial.println("MQTT State: StateConnectionTimeout");
-      break;
-    case -3:
-      Serial.println("MQTT State: StateConnectionLost");
-      break;
-    case -2:
-      Serial.println("MQTT State: StateConnectionFailed");
-      break;
-    case -1:
-      Serial.println("MQTT State: StateDisconnected");
-      break;
-    case 0:
-      Serial.println("MQTT State: StateConnected");
-      break;
-    case 1:
-      Serial.println("MQTT State: StateBadProtocol");
-      break;
-    case 2:
-      Serial.println("MQTT State: StateBadClientId");
-      break;
-    case 3:
-      Serial.println("MQTT State: StateUnavailable");
-      break;
-    case 4:
-      Serial.println("MQTT State: StateBadCredentials");
-      break;
-    case 5:
-      Serial.println("MQTT State: StateUnauthorized");
-    default:
-      break;
-    }
-  }
+
 }
 
+void MQTTManager_::printStatus()
+{
+  switch (mqtt.getState())
+  {
+  case -5:
+    Serial.println("MQTT State: StateConnecting");
+    break;
+  case -4:
+    Serial.println("MQTT State: StateConnectionTimeout");
+    break;
+  case -3:
+    Serial.println("MQTT State: StateConnectionLost");
+    break;
+  case -2:
+    Serial.println("MQTT State: StateConnectionFailed");
+    break;
+  case -1:
+    Serial.println("MQTT State: StateDisconnected");
+    break;
+  case 0:
+    Serial.println("MQTT State: StateConnected");
+    break;
+  case 1:
+    Serial.println("MQTT State: StateBadProtocol");
+    break;
+  case 2:
+    Serial.println("MQTT State: StateBadClientId");
+    break;
+  case 3:
+    Serial.println("MQTT State: StateUnavailable");
+    break;
+  case 4:
+    Serial.println("MQTT State: StateBadCredentials");
+    break;
+  case 5:
+    Serial.println("MQTT State: StateUnauthorized");
+  default:
+    break;
+  }
+}

@@ -2,6 +2,8 @@
 #define MQTTManager_h
 #include <Arduino.h>
 
+#define MQTT_STRING_LENGTH 256
+
 class MQTTManager_
 {
 private:
@@ -11,6 +13,7 @@ public:
     static MQTTManager_ &getInstance();
     void setup();
     void connect(String servername, String username, String password);
+    void printStatus();
     void tick();
 };
 

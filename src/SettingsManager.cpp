@@ -13,17 +13,19 @@ Preferences Settings;
 #define KEY_MQTT_ADDR "mqttaddr"
 #define KEY_MQTT_USER "mqttuser"
 #define KEY_MQTT_PASS "mqttpass"
-#define KEY_MQTT_HA_DISCOVERY_PREFIX "mqttprefix"
+#define KEY_MQTT_DATA_PREFIX "mqttdataprefix"
+#define KEY_MQTT_HA_DISCOVERY_PREFIX "mqttdiscprefix"
 #define KEY_MDNS_HOSTNAME "mdnshostname"
 
 // default values for preferences
 #define DEFAULT_WIFI_SSID "ssid"
 #define DEFAULT_WIFI_PASS "password"
 #define DEFAULT_MQTT_ADDR "homeassistant.local"
-#define DEFAULT_MQTT_USER "mqttuser"
-#define DEFAULT_MQTT_PASS "mqttpass"
+#define DEFAULT_MQTT_USER "username"
+#define DEFAULT_MQTT_PASS "password"
+#define DEFAULT_MQTT_DATA_PREFIX "fakenixie_"
 #define DEFAULT_MQTT_HA_DISCOVERY_PREFIX "homeassistant"
-#define DEFAULT_MDNS_HOSTNAME "elektstube-r"
+#define DEFAULT_MDNS_HOSTNAME "fakenixie_"
 
 SettingsManager_ &SettingsManager_::getInstance()
 {
@@ -33,7 +35,7 @@ SettingsManager_ &SettingsManager_::getInstance()
 
 SettingsManager_ &SettingsManager = SettingsManager.getInstance();
 
-void SettingsManager_::setup()
+void SettingsManager_::setup(char* deviceIdentifierSuffix)
 {
     // check whether namespace exists, if not, create it
     Settings.begin(SETTINGS_NS, RO_MODE);
@@ -52,6 +54,8 @@ void SettingsManager_::setup()
         Settings.putString(KEY_MQTT_ADDR, DEFAULT_MQTT_ADDR);
         Settings.putString(KEY_MQTT_USER, DEFAULT_MQTT_USER);
         Settings.putString(KEY_MQTT_PASS, DEFAULT_MQTT_PASS);
+        // use a device specific id for the data prefix and the hostname in case there are two devices to set up at the same time
+        Settings.putString(KEY_MQTT_DATA_PREFIX, DEFAULT_MQTT_DATA_PREFIX);
         Settings.putString(KEY_MQTT_HA_DISCOVERY_PREFIX, DEFAULT_MQTT_HA_DISCOVERY_PREFIX);
         Settings.putString(KEY_MDNS_HOSTNAME, DEFAULT_MDNS_HOSTNAME);
 
@@ -101,8 +105,10 @@ void SettingsManager_::printToSerial()
     Serial.println("S_WIFI_SSID: "+ S_WIFI_SSID);
     Serial.println("S_WIFI_PASS: "+ S_WIFI_PASS);
     Serial.println("S_MQTT_ADDR: "+ S_MQTT_ADDR);
-    Serial.println("S_MQTT_USER: "+ S_MQTT_USER);
-    Serial.println("S_MQTT_PASS: "+ S_MQTT_PASS);
+    Serial.print("S_MQTT_USER: ");
+    Serial.println(S_MQTT_USER);
+    Serial.print("S_MQTT_PASS: ");
+    Serial.println(S_MQTT_PASS);
     Serial.println("S_MQTT_HA_DISCOVERY_PREFIX: "+ S_MQTT_HA_DISCOVERY_PREFIX);
     Serial.println("S_MDNS_HOSTNAME: "+ S_MDNS_HOSTNAME);
     Serial.println("--------------------------------------");
