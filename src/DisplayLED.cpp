@@ -1,6 +1,6 @@
 #include <FastLED.h>
 #include <DisplayLED.h>
-
+#include <bits/stdc++.h>
 #define DATA_PIN_LED_CLOCK 1
 #define NUM_LEDS_CLOCK 120
 
@@ -85,30 +85,56 @@ int DisplayLED_::get2Digit(int value, int digit)
         return (value / 10);
 }
 
-ColorTemperature DisplayLED_::getColorTemperature(uint16_t temperature)
+
+
+CRGB DisplayLED_::Mired2RGB(uint16_t mired)
 {
-    // HA reports color temperature in Mired
-    if (temperature < 140)
-        return ColorTemperature::DirectSunlight;
-    if (temperature < 170)
-        return ColorTemperature::HighNoonSun;
-    if (temperature < 180)
-        return ColorTemperature::CarbonArc;
-    if (temperature < 190)
-        return ColorTemperature::Halogen;
-    if (temperature < 230)
-        return ColorTemperature::Tungsten100W;
-    if (temperature < 340)
-        return ColorTemperature::Tungsten40W;
-    if (temperature < 380)
-        return ColorTemperature::Candle;
-    // default return value if outside range
-    return ColorTemperature::Candle;
+    // use the algorithm from
+    // https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
+    // which basically approximates the curves you get from this chart data
+    // http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html
+
+    // homeassistant reports colortemperature in Mired, so convert to 100s of kelvins first
+
+    float temperature = 10000.0 / ((float)(mired));
+    CRGB tempCol = CRGB::White;
+    float redVal, greenVal, blueVal;
+    const float minVal = 00;
+    const float maxVal = 255.0;
+    // the algorithm can be simplified by truncating at 6600K (RGB #FFFFFF) as HA does not go above that value.
+    if (temperature < 66)
+    {
+
+        tempCol.r = 255;
+
+        greenVal = 99.4708025861 * log(temperature) - 161.1195681661;
+        tempCol.g = min(maxVal, max(minVal, greenVal));
+
+        if (temperature <= 19)
+        {
+            tempCol.b = 0;
+        }
+        else
+        {
+            blueVal = temperature - 10;
+            blueVal = 138.5177312231 * log(blueVal) - 305.0447927307;
+            tempCol.b = min(maxVal, max(minVal, blueVal));
+        }
+    }
+    Serial.print("set Color Temperature: ");
+    Serial.print((int32_t)(temperature*100));
+    Serial.print(", R: ");
+    Serial.print(tempCol.r);
+    Serial.print(", G: ");
+    Serial.print(tempCol.g);
+    Serial.print(", B: ");
+    Serial.println(tempCol.b);
+    return tempCol;
 }
 
 void DisplayLED_::SetColorTemperature(uint16_t temperature)
 {
-    baseColor_.setColorCode(getColorTemperature(temperature));
+    baseColor_=Mired2RGB(temperature);
 }
 
 void DisplayLED_::SetTimeHMS(int hours, int minutes, int seconds)
@@ -123,14 +149,12 @@ void DisplayLED_::SetTimeHMS(int hours, int minutes, int seconds)
 
 void DisplayLED_::SetPasscode(int passcode)
 {
-    int temp= passcode;
+    int temp = passcode;
     for (uint8_t i = 0; i < 6; i++)
     {
-        SetDigit(5-i,temp % 10);
-        temp/=10;
+        SetDigit(5 - i, temp % 10);
+        temp /= 10;
     }
-    
-
 }
 
 void DisplayLED_::update()
@@ -143,8 +167,6 @@ void DisplayLED_::clear()
     {
         nixieLed[i] = CRGB::Black;
     }
-    
-    
 }
 
 DisplayLED_ &DisplayLED = DisplayLED.getInstance();

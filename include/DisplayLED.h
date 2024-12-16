@@ -11,7 +11,7 @@ private:
     CRGB getRGB();
     int get2Digit(int value, int digit);
     void SetDigit(int digit, int value);
-    ColorTemperature getColorTemperature(uint16_t temperature);
+
 
 public:
     static DisplayLED_ &getInstance();
@@ -19,8 +19,9 @@ public:
 
     void SetState(bool state);
     void SetRGB(CRGB color);
-    void SetBrightness(uint8_t brightness);
 
+    void SetBrightness(uint8_t brightness);
+    CRGB Mired2RGB(uint16_t mired);
     void SetColorTemperature(uint16_t temperature);
     void SetTimeHMS(int hours, int minutes, int seconds);
     void SetPasscode(int passcode);
