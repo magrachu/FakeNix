@@ -8,6 +8,11 @@ const char *PARAM_INPUT_WLAN_PASS = "inputWlanPass";
 const char *PARAM_INPUT_MQTT_ADDR = "inputMqttAddr";
 const char *PARAM_INPUT_MQTT_USER = "inputMqttUser";
 const char *PARAM_INPUT_MQTT_PASS = "inputMqttPass";
+const char *PARAM_INPUT_MQTT_DATA_PREFIX = "inputMqttDataPrefix";
+const char *PARAM_INPUT_MQTT_HA_PREFIX = "inputMqttHaAutoDiscoveryPrefix";
+
+
+
 
 String getSSIDHtmlListItems()
 {
@@ -47,7 +52,16 @@ String processor(const String &var)
     {
         return String(S_MQTT_USER);
     }
+    else if (var == "TMPL_MQTT_DATA_PREFIX")
+    {
+        return String(S_MQTT_DATA_PREFIX);
+    }
+    else if (var == "TMPL_MQTT_HA_PREFIX")
+    {
+        return String(S_MQTT_HA_DISCOVERY_PREFIX);
+    }
 
+ 
     return String();
 }
 
@@ -60,6 +74,30 @@ void notFound(AsyncWebServerRequest *request)
 {
     request->send(404, "text/plain", "Not found");
 }
+
+class CaptiveRequestHandler : public AsyncWebHandler
+{
+public:
+    CaptiveRequestHandler() {}
+    virtual ~CaptiveRequestHandler() {}
+
+    bool canHandle(AsyncWebServerRequest *request)
+    {
+        // request->addInterestingHeader("ANY");
+        return true;
+    }
+
+    void handleRequest(AsyncWebServerRequest *request)
+    {
+        AsyncResponseStream *response = request->beginResponseStream("text/html");
+        response->print("<!DOCTYPE html><html><head><title>Captive Portal</title></head><body>");
+        response->print("<p>This is out captive portal front page.</p>");
+        response->printf("<p>You were trying to reach: http://%s%s</p>", request->host().c_str(), request->url().c_str());
+        response->printf("<p>Try opening <a href='http://%s'>this link</a> instead</p>", WiFi.softAPIP().toString().c_str());
+        response->print("</body></html>");
+        request->send(response);
+    }
+};
 
 void WebserverManager_::setup()
 {
@@ -95,10 +133,7 @@ void WebserverManager_::setup()
                     {
                         Serial.println("keep old wlan password");
                     }
-
-                    
-                    
-                      
+  
                   }
                   if (request->hasParam(PARAM_INPUT_MQTT_ADDR))
                   {
@@ -124,10 +159,21 @@ void WebserverManager_::setup()
                     }
                       
                   }
+                  if (request->hasParam(PARAM_INPUT_MQTT_DATA_PREFIX))
+                  {
+                    S_MQTT_DATA_PREFIX= request->getParam(PARAM_INPUT_MQTT_DATA_PREFIX)->value();
+
+                  }
+                  if (request->hasParam(PARAM_INPUT_MQTT_HA_PREFIX))
+                  {
+                    S_MQTT_HA_DISCOVERY_PREFIX= request->getParam(PARAM_INPUT_MQTT_HA_PREFIX)->value();
+
+                  }
+                  
                   SettingsManager.save();
                   request->send(200, "text/html", "Settings saved, device will reboot");
                   ESP.restart(); });
-
+    server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
     server.begin();
 }
 

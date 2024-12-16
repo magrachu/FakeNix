@@ -1,6 +1,7 @@
 #ifndef WebserverManager_h
 #define WebserverManager_h
 #include "WifiManager.h"
+
 class WebserverManager_
 {
 private:
@@ -75,6 +76,14 @@ const char index_html[] PROGMEM = R"rawliteral(
                     <tr>
                         <td>MQTT Password</td>
                         <td><input type="password" value="" name="inputMqttPass"></td>
+                    </tr>
+                    <tr>
+                        <td>MQTT data prefix</td>
+                        <td><input type="text" value="%TMPL_MQTT_DATA_PREFIX%" name="inputMqttDataPrefix"></td>
+                    </tr>
+                    <tr>
+                        <td>MQTT HA autodiscovery prefix (usually "homeassistant")</td>
+                        <td><input type="value" value="%TMPL_MQTT_HA_PREFIX%" name="inputMqttHaAutoDiscoveryPrefix"></td>
                     </tr>
                 </table>
                

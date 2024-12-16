@@ -10,7 +10,7 @@ WifiManager_ &WifiManager_::getInstance()
 }
 
 WifiManager_ &WifiManager = WifiManager.getInstance();
-
+DNSServer dnsServer;
 int status = WL_IDLE_STATUS;
 bool setupLoopBusy = true;
 int16_t numNetworks = 0;
@@ -75,6 +75,7 @@ void WifiManager_::begin()
         Serial.println("AP SSID: " + ssid);
         Serial.println("AP PW: "+password);
         WiFi.softAP(ssid, password);
+        dnsServer.start(53, "*", WiFi.softAPIP());
         currentWifiMode = WIFIMANAGER_MODE_AP;
         break;
     default:

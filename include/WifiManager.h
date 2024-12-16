@@ -2,6 +2,7 @@
 #define WifiManager_h
 #include <Arduino.h>
 #include <WiFi.h>
+#include <DNSServer.h>
 #include <WiFiAP.h>
 #include <SettingsManager.h>
 

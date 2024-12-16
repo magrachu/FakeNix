@@ -47,7 +47,7 @@ void setup()
   Serial.begin(115200);
   delay(5000);
   
-  Serial.println("Elekstube-R");
+  Serial.println("FakeNixie setup");
 
   DisplayLED.setup();
   DisplayLED.clear();
@@ -71,7 +71,7 @@ void setup()
   case WIFIMANAGER_MODE_CONNECTED:
     internalLed[0] = CRGB::Green;
     OTAManager.setup();
-    MQTTManager.setup();
+    MQTTManager.setup(macAddress,MAC_ADDRESS_SIZE);
     MQTTManager.connect(S_MQTT_ADDR, S_MQTT_USER, S_MQTT_PASS);
 
 

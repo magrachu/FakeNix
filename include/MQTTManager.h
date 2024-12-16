@@ -11,7 +11,7 @@ private:
 
 public:
     static MQTTManager_ &getInstance();
-    void setup();
+    void setup(byte* uniqueId, uint8_t uidLength);
     void connect(String servername, String username, String password);
     void printStatus();
     void tick();

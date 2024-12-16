@@ -55,7 +55,7 @@ void SettingsManager_::setup(char* deviceIdentifierSuffix)
         Settings.putString(KEY_MQTT_USER, DEFAULT_MQTT_USER);
         Settings.putString(KEY_MQTT_PASS, DEFAULT_MQTT_PASS);
         // use a device specific id for the data prefix and the hostname in case there are two devices to set up at the same time
-        Settings.putString(KEY_MQTT_DATA_PREFIX, DEFAULT_MQTT_DATA_PREFIX);
+        Settings.putString(KEY_MQTT_DATA_PREFIX, DEFAULT_MQTT_DATA_PREFIX+String(deviceIdentifierSuffix));
         Settings.putString(KEY_MQTT_HA_DISCOVERY_PREFIX, DEFAULT_MQTT_HA_DISCOVERY_PREFIX);
         Settings.putString(KEY_MDNS_HOSTNAME, DEFAULT_MDNS_HOSTNAME);
 
@@ -72,6 +72,7 @@ void SettingsManager_::load()
     S_MQTT_ADDR = Settings.getString(KEY_MQTT_ADDR, DEFAULT_MQTT_ADDR);
     S_MQTT_USER = Settings.getString(KEY_MQTT_USER, DEFAULT_MQTT_USER);
     S_MQTT_PASS = Settings.getString(KEY_MQTT_PASS, DEFAULT_MQTT_PASS);
+    S_MQTT_DATA_PREFIX = Settings.getString(KEY_MQTT_DATA_PREFIX, DEFAULT_MQTT_DATA_PREFIX);
     S_MQTT_HA_DISCOVERY_PREFIX = Settings.getString(KEY_MQTT_HA_DISCOVERY_PREFIX, DEFAULT_MQTT_HA_DISCOVERY_PREFIX);
     S_MDNS_HOSTNAME = Settings.getString(KEY_MDNS_HOSTNAME, DEFAULT_MDNS_HOSTNAME);
     Settings.end();
@@ -86,6 +87,7 @@ void SettingsManager_::save()
     Settings.putString(KEY_MQTT_ADDR, S_MQTT_ADDR);
     Settings.putString(KEY_MQTT_USER, S_MQTT_USER);
     Settings.putString(KEY_MQTT_PASS, S_MQTT_PASS);
+    Settings.putString(KEY_MQTT_DATA_PREFIX, S_MQTT_DATA_PREFIX);
     Settings.putString(KEY_MQTT_HA_DISCOVERY_PREFIX, S_MQTT_HA_DISCOVERY_PREFIX);
     Settings.putString(KEY_MDNS_HOSTNAME, S_MDNS_HOSTNAME);
 
@@ -102,15 +104,21 @@ void SettingsManager_::reset()
 void SettingsManager_::printToSerial()
 {
     Serial.println("-----------Current Settings:----------");
-    Serial.println("S_WIFI_SSID: "+ S_WIFI_SSID);
-    Serial.println("S_WIFI_PASS: "+ S_WIFI_PASS);
-    Serial.println("S_MQTT_ADDR: "+ S_MQTT_ADDR);
+    Serial.print("S_WIFI_SSID: ");
+    Serial.println(S_WIFI_SSID);
+    Serial.println("S_WIFI_PASS: ******");
+    Serial.print("S_MQTT_ADDR: ");
+    Serial.println(S_MQTT_ADDR);
     Serial.print("S_MQTT_USER: ");
     Serial.println(S_MQTT_USER);
-    Serial.print("S_MQTT_PASS: ");
+    Serial.print("S_MQTT_PASS: *****");
     Serial.println(S_MQTT_PASS);
-    Serial.println("S_MQTT_HA_DISCOVERY_PREFIX: "+ S_MQTT_HA_DISCOVERY_PREFIX);
-    Serial.println("S_MDNS_HOSTNAME: "+ S_MDNS_HOSTNAME);
+    Serial.print("S_MQTT_DATA_PREFIX: ");
+    Serial.println(S_MQTT_DATA_PREFIX);
+    Serial.print("S_MQTT_HA_DISCOVERY_PREFIX: ");
+    Serial.println(S_MQTT_HA_DISCOVERY_PREFIX);
+    Serial.print("S_MDNS_HOSTNAME: ");
+    Serial.println(S_MDNS_HOSTNAME);
     Serial.println("--------------------------------------");
 
        
@@ -121,5 +129,6 @@ String S_WIFI_PASS;
 String S_MQTT_ADDR;
 String S_MQTT_USER;
 String S_MQTT_PASS;
+String S_MQTT_DATA_PREFIX;
 String S_MQTT_HA_DISCOVERY_PREFIX;
 String S_MDNS_HOSTNAME;

@@ -9,7 +9,7 @@
 
 WiFiClient espWifiClient;
 
-HADevice device("Elekstube-R");
+HADevice device;
 HAMqtt mqtt(espWifiClient, device);
 HALight light("digitLight", HALight::BrightnessFeature | HALight::ColorTemperatureFeature | HALight::RGBFeature);
 int tickCounter = 0;
@@ -55,34 +55,25 @@ void onRGBColorCommand(HALight::RGBColor color, HALight *sender)
   sender->setRGBColor(color); // report color back to the Home Assistant
 }
 
-void MQTTManager_::setup()
+void MQTTManager_::setup(byte* uniqueId, uint8_t uidLength)
 {
-#warning "set constant for platform"
-  byte mac[6];
-  WiFi.macAddress(mac);
-  String uniqueId = "Elekstube-" + String(mac[2]) + String(mac[3]) + String(mac[4]) + String(mac[5]);
-  byte chUniqueId[50] = {69, 108, 101, 107, 's', 't', 'u', 'b', 'e', '-'};
-  for (int i = 0; i < 4; i++)
-  {
-    chUniqueId[10 + i] = mac[2 + i];
-  }
-  chUniqueId[14] = 0;
-  Serial.println(mqtt.getDataPrefix());
-  mqtt.setDataPrefix("FakeNixie");
-  mqtt.setDiscoveryPrefix("homeassistant");
+ 
+ 
+  device.setUniqueId(uniqueId,uidLength);
+
+  mqtt.setDataPrefix(S_MQTT_DATA_PREFIX.c_str());
+  mqtt.setDiscoveryPrefix(S_MQTT_HA_DISCOVERY_PREFIX.c_str());
   device.enableExtendedUniqueIds();
-  device.setUniqueId(mac, sizeof(mac));
+  
+  
   device.setName("Fake Nixie Clock");
   device.setSoftwareVersion("0.0.1");
   device.setManufacturer("magrachu");
   device.setModel("FakeNixie");
  
-  strcat(_configURL,WiFi.localIP().toString().c_str());
-  device.setConfigurationUrl(_configURL);
-  Serial.print("cu: ");
-  Serial.println(_configURL);
+  
   //device.setConfigurationUrl("httpeeee:////");
-  Serial.println(device.getUniqueId());
+  //Serial.println(device.getUniqueId());
   device.enableSharedAvailability();
   device.enableLastWill();
 
