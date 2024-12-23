@@ -12,6 +12,9 @@ WiFiClient espWifiClient;
 HADevice device;
 HAMqtt mqtt(espWifiClient, device);
 HALight light("digitLight", HALight::BrightnessFeature | HALight::ColorTemperatureFeature | HALight::RGBFeature);
+HALight lightLeft("leftSideColor",HALight::BrightnessFeature  | HALight::RGBFeature);
+HALight lightRight("rightSideColor",HALight::BrightnessFeature  | HALight::RGBFeature);
+
 int tickCounter = 0;
 char _username[MQTT_STRING_LENGTH];
 char _password[MQTT_STRING_LENGTH];
@@ -49,9 +52,22 @@ void onColorTemperatureCommand(uint16_t temperature, HALight *sender)
 
 void onRGBColorCommand(HALight::RGBColor color, HALight *sender)
 {
-  CRGB val;
-  val.setRGB(color.red, color.green, color.blue);
-  DisplayLED.SetRGB(val);
+  if (sender->getObjectId() == light.getObjectId())
+  {
+    CRGB val;
+    val.setRGB(color.red, color.green, color.blue);
+    DisplayLED.SetRGB(val);
+
+  }
+  if (sender->getObjectId() == light.getObjectId())
+  {
+    CRGB val;
+    val.setRGB(color.red, color.green, color.blue);
+    DisplayLED.SetRGB(val);
+  }
+
+  
+  
   sender->setRGBColor(color); // report color back to the Home Assistant
 }
 
@@ -72,15 +88,21 @@ void MQTTManager_::setup(byte* uniqueId, uint8_t uidLength)
   device.setModel("FakeNixie");
  
   
-  //device.setConfigurationUrl("httpeeee:////");
-  //Serial.println(device.getUniqueId());
+
   device.enableSharedAvailability();
   device.enableLastWill();
+  light.setObjectId("Single color");
+
+  light.setName("Single Light");
+  lightLeft.setName("Left side color");
+  lightLeft.setIcon("mdi:menu-left");
+  lightRight.setName("Right side color");
+  lightRight.setIcon("mdi:menu-right");
 
   light.onStateCommand(onStateCommand);
-  light.onBrightnessCommand(onBrightnessCommand);             // optional
-  light.onColorTemperatureCommand(onColorTemperatureCommand); // optional
-  light.onRGBColorCommand(onRGBColorCommand);                 // optional
+  light.onBrightnessCommand(onBrightnessCommand);             
+  light.onColorTemperatureCommand(onColorTemperatureCommand); 
+  light.onRGBColorCommand(onRGBColorCommand);                 
 }
 
 void MQTTManager_::connect(String servername, String username, String password)

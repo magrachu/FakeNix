@@ -112,7 +112,6 @@ void SettingsManager_::printToSerial()
     Serial.print("S_MQTT_USER: ");
     Serial.println(S_MQTT_USER);
     Serial.print("S_MQTT_PASS: *****");
-    Serial.println(S_MQTT_PASS);
     Serial.print("S_MQTT_DATA_PREFIX: ");
     Serial.println(S_MQTT_DATA_PREFIX);
     Serial.print("S_MQTT_HA_DISCOVERY_PREFIX: ");

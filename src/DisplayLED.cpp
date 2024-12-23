@@ -11,9 +11,13 @@ CRGB nixieLed[NUM_LEDS_CLOCK];
 const int digitOffset[10] = {5, 0, 6, 1, 7, 2, 8, 3, 9, 4};
 #define LED_DIGIT_OFFSET 10
 #define LED_PER_DIGIT 2
+#define NUM_HALF_DIGIT 12
+
 
 bool state_ = true;
-CRGB baseColor_ = CRGB::DarkOrange;
+// CRGB baseColor_ = CRGB::DarkOrange;
+CRGB halfDigitColor_[NUM_HALF_DIGIT];
+
 uint8_t brightness_ = 255;
 
 DisplayLED_ &DisplayLED_::getInstance()
@@ -25,6 +29,8 @@ DisplayLED_ &DisplayLED_::getInstance()
 void DisplayLED_::setup()
 {
     FastLED.addLeds<NEOPIXEL, DATA_PIN_LED_CLOCK>(nixieLed, NUM_LEDS_CLOCK);
+    SetRGB(CRGB::Blue,CRGB::Red);
+    
 }
 
 void DisplayLED_::SetState(bool state)
@@ -33,19 +39,43 @@ void DisplayLED_::SetState(bool state)
 }
 void DisplayLED_::SetRGB(CRGB color)
 {
-    baseColor_ = color;
+    for (uint8_t i = 0; i < NUM_HALF_DIGIT; i++)
+    {
+        halfDigitColor_[i]= color;
+    }
 }
+
+void DisplayLED_::SetRGB(CRGB leftColor,CRGB rightColor)
+{
+    Serial.print("leftColor: ");
+    PrintColorToSerial(leftColor);
+    Serial.print("rightColor: ");
+    PrintColorToSerial(rightColor);
+    fract8 fracPart=255/(NUM_HALF_DIGIT-1);
+    for (uint8_t i = 0; i < NUM_HALF_DIGIT; i++)
+    {
+
+        halfDigitColor_[i]=halfDigitColor_[i].blend(leftColor,rightColor,(fract8)i*fracPart);
+        PrintColorToSerial(halfDigitColor_[i]);
+    }
+}
+
+void DisplayLED_::PrintColorToSerial(CRGB color){
+    Serial.println("R: "+String(color.r) + " G: "+ String(color.g) + " B: "+ String(color.b));
+
+}
+
 void DisplayLED_::SetBrightness(uint8_t brightness)
 {
     brightness_ = brightness;
 }
 
-CRGB DisplayLED_::getRGB()
+CRGB DisplayLED_::GetRGB(uint8_t halfDigitIndex)
 {
     CRGB col;
     if (state_ == true)
     {
-        col = baseColor_;
+        col = halfDigitColor_[halfDigitIndex];
         col.maximizeBrightness();
         col.nscale8_video(brightness_);
         return col;
@@ -62,15 +92,17 @@ void DisplayLED_::SetDigit(int digit, int value)
     for (int i = 0; i < LED_DIGIT_OFFSET * LED_PER_DIGIT; i++)
     {
         // check array size first
-        if (i == digitOffset[value] || (i == (digitOffset[value] + LED_DIGIT_OFFSET)))
+        if (i == digitOffset[value]  )
         {
-            nixieLed[i + baseLedIdx] = getRGB();
+            nixieLed[i + baseLedIdx] = GetRGB(digit);
+        }
+        else if ((i == (digitOffset[value] + LED_DIGIT_OFFSET)))
+        {
+            nixieLed[i + baseLedIdx] = GetRGB(digit+1);
         }
         else
         {
             nixieLed[i + baseLedIdx].nscale8(200);
-            // leds[i+baseLedIdx].subtractFromRGB(clockColor.r/10);
-            //  leds[i+baseLedIdx]-=clockColor/10;
         }
     }
 
@@ -134,7 +166,12 @@ CRGB DisplayLED_::Mired2RGB(uint16_t mired)
 
 void DisplayLED_::SetColorTemperature(uint16_t temperature)
 {
-    baseColor_=Mired2RGB(temperature);
+    CRGB tempCol=Mired2RGB(temperature);
+    for (uint8_t i = 0; i < NUM_HALF_DIGIT; i++)
+    {
+        halfDigitColor_[i]= tempCol;
+    }
+    
 }
 
 void DisplayLED_::SetTimeHMS(int hours, int minutes, int seconds)

@@ -19,12 +19,14 @@ public:
 
     void SetState(bool state);
     void SetRGB(CRGB color);
-
+    void SetRGB(CRGB leftColor,CRGB rightColor);
+    CRGB GetRGB(uint8_t halfDigitIndex);
     void SetBrightness(uint8_t brightness);
     CRGB Mired2RGB(uint16_t mired);
     void SetColorTemperature(uint16_t temperature);
     void SetTimeHMS(int hours, int minutes, int seconds);
     void SetPasscode(int passcode);
+    void PrintColorToSerial(CRGB color);
     void clear();
     void update();
 };
