@@ -4,6 +4,9 @@
 #include <FastLED.h>
 #include <ArduinoHA.h>
 
+enum enLightMode {LIGHT_MODE_SINGLE, LIGHT_MODE_GRADIENT, LIGHT_MODE_RAINBOW};
+
+
 class DisplayLED_
 {
 private:
@@ -16,7 +19,11 @@ private:
 public:
     static DisplayLED_ &getInstance();
     void setup();
-
+    enLightMode LightMode;
+    CRGB SingleColor;
+    CRGB LeftColor;
+    CRGB RightColor;
+    void UpdateColor();
     void SetState(bool state);
     void SetRGB(CRGB color);
     void SetRGB(CRGB leftColor,CRGB rightColor);

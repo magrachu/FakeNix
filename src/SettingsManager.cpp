@@ -25,7 +25,7 @@ Preferences Settings;
 #define DEFAULT_MQTT_PASS "password"
 #define DEFAULT_MQTT_DATA_PREFIX "fakenixie_"
 #define DEFAULT_MQTT_HA_DISCOVERY_PREFIX "homeassistant"
-#define DEFAULT_MDNS_HOSTNAME "fakenixie_"
+#define DEFAULT_MDNS_HOSTNAME "fakenixie"
 
 SettingsManager_ &SettingsManager_::getInstance()
 {

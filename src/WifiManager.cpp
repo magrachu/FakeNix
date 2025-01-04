@@ -65,6 +65,7 @@ void WifiManager_::begin()
     {
     case WIFIMANAGER_MODE_CONNECTED:
         currentWifiMode = WIFIMANAGER_MODE_CONNECTED;
+        
         break;
     case WIFIMANAGER_MODE_AP:
         // scan networks

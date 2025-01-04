@@ -5,6 +5,7 @@
 AsyncWebServer server(80);
 const char *PARAM_INPUT_WLAN_SSID = "inputWlanSsid";
 const char *PARAM_INPUT_WLAN_PASS = "inputWlanPass";
+const char *PARAM_INPUT_MDNS_HOSTNAME = "inputMdnsHostname";
 const char *PARAM_INPUT_MQTT_ADDR = "inputMqttAddr";
 const char *PARAM_INPUT_MQTT_USER = "inputMqttUser";
 const char *PARAM_INPUT_MQTT_PASS = "inputMqttPass";
@@ -43,6 +44,10 @@ String processor(const String &var)
     else if (var == "TMPL_SSID")
     {
         return String(S_WIFI_SSID);
+    }
+    else if (var == "TMPL_MDNS_HOSTNAME")
+    {
+        return String(S_MDNS_HOSTNAME);
     }
     else if (var == "TMPL_MQTT_ADDR")
     {
@@ -134,6 +139,11 @@ void WebserverManager_::setup()
                         Serial.println("keep old wlan password");
                     }
   
+                  }
+                  if (request->hasParam(PARAM_INPUT_MDNS_HOSTNAME))
+                  {
+                      S_MDNS_HOSTNAME = request->getParam(PARAM_INPUT_MDNS_HOSTNAME)->value();
+                      Serial.println(S_MDNS_HOSTNAME);
                   }
                   if (request->hasParam(PARAM_INPUT_MQTT_ADDR))
                   {

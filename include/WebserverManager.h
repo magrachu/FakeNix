@@ -66,6 +66,10 @@ const char index_html[] PROGMEM = R"rawliteral(
                         <td><input type="password" value="" name="inputWlanPass"></td>
                     </tr>
                     <tr>
+                        <td>MDNS Hostname</td>
+                        <td><input type="text" value="%TMPL_MDNS_HOSTNAME%" name="inputMdnsHostname"></td>
+                    </tr>
+                    <tr>
                         <td>MQTT Servername</td>
                         <td><input type="text" value="%TMPL_MQTT_ADDR%" name="inputMqttAddr"></td>
                     </tr>

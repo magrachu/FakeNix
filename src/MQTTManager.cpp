@@ -14,11 +14,13 @@ HAMqtt mqtt(espWifiClient, device);
 HALight light("digitLight", HALight::BrightnessFeature | HALight::ColorTemperatureFeature | HALight::RGBFeature);
 HALight lightLeft("leftSideColor",HALight::BrightnessFeature  | HALight::RGBFeature);
 HALight lightRight("rightSideColor",HALight::BrightnessFeature  | HALight::RGBFeature);
+HASelect lightMode("lightMode");
 
 int tickCounter = 0;
 char _username[MQTT_STRING_LENGTH];
 char _password[MQTT_STRING_LENGTH];
 char _hostname[MQTT_STRING_LENGTH];
+char _mdnsHostname[MQTT_STRING_LENGTH];
 char _configURL[MQTT_STRING_LENGTH]= "http://";
 
 MQTTManager_ &MQTTManager_::getInstance()
@@ -52,28 +54,67 @@ void onColorTemperatureCommand(uint16_t temperature, HALight *sender)
 
 void onRGBColorCommand(HALight::RGBColor color, HALight *sender)
 {
+  CRGB val;
+  val.setRGB(color.red,color.green,color.blue);
+
   if (sender->getObjectId() == light.getObjectId())
   {
-    CRGB val;
-    val.setRGB(color.red, color.green, color.blue);
-    DisplayLED.SetRGB(val);
+    DisplayLED.SingleColor=val;
+    DisplayLED.UpdateColor();
 
   }
-  if (sender->getObjectId() == light.getObjectId())
+  if (sender->getObjectId() == lightLeft.getObjectId())
   {
-    CRGB val;
-    val.setRGB(color.red, color.green, color.blue);
-    DisplayLED.SetRGB(val);
+    DisplayLED.LeftColor=val;
+    DisplayLED.UpdateColor();
   }
-
-  
+  if (sender->getObjectId() == lightRight.getObjectId())
+  {
+    DisplayLED.RightColor=val;
+    DisplayLED.UpdateColor();
+  }
   
   sender->setRGBColor(color); // report color back to the Home Assistant
 }
 
+
+void onSelectCommand(int8_t index, HASelect* sender)
+{
+    switch (index) {
+    case 0:
+        DisplayLED.LightMode=LIGHT_MODE_SINGLE;
+        DisplayLED.UpdateColor();
+        break;
+    case 1:
+        DisplayLED.LightMode=LIGHT_MODE_GRADIENT;
+        DisplayLED.UpdateColor();
+        break;
+
+    case 2:
+        DisplayLED.LightMode=LIGHT_MODE_RAINBOW;
+        DisplayLED.UpdateColor();
+        break;
+
+    default:
+      DisplayLED.LightMode=LIGHT_MODE_SINGLE;
+        DisplayLED.UpdateColor();
+        // unknown option
+        return;
+    }
+
+    sender->setState(index); // report the selected option back to the HA panel
+
+    // it may return null
+    if (sender->getCurrentOption()) {
+        Serial.print("Current option: ");
+        Serial.println(sender->getCurrentOption());
+    }
+}
+
 void MQTTManager_::setup(byte* uniqueId, uint8_t uidLength)
 {
- 
+
+ strcpy(_mdnsHostname, S_MDNS_HOSTNAME.c_str());
  
   device.setUniqueId(uniqueId,uidLength);
 
@@ -102,8 +143,18 @@ void MQTTManager_::setup(byte* uniqueId, uint8_t uidLength)
   light.onStateCommand(onStateCommand);
   light.onBrightnessCommand(onBrightnessCommand);             
   light.onColorTemperatureCommand(onColorTemperatureCommand); 
-  light.onRGBColorCommand(onRGBColorCommand);                 
+  light.onRGBColorCommand(onRGBColorCommand);    
+
+  // set available options
+    lightMode.setOptions("Single;Gradient;Rainbow"); // use semicolons as separator of options
+    lightMode.onCommand(onSelectCommand);
+
+    lightMode.setIcon("mdi:home"); // optional
+    lightMode.setName("Light mode"); // optional
+
 }
+
+
 
 void MQTTManager_::connect(String servername, String username, String password)
 {
@@ -113,8 +164,17 @@ void MQTTManager_::connect(String servername, String username, String password)
   strcpy(_username, username.c_str());
   strcpy(_password, password.c_str());
 
+
   mqtt.begin(_hostname, _username, _password);
 
+  MDNS.begin(_mdnsHostname);
+  HALight::RGBColor val;
+  light.setRGBColor(HALight::RGBColor(DisplayLED.SingleColor.r,DisplayLED.SingleColor.g,DisplayLED.SingleColor.b));
+lightLeft.setRGBColor(HALight::RGBColor(DisplayLED.LeftColor.r,DisplayLED.LeftColor.g,DisplayLED.LeftColor.b));
+lightRight.setRGBColor(HALight::RGBColor(DisplayLED.RightColor.r,DisplayLED.RightColor.g,DisplayLED.RightColor.b));
+lightMode.setState(0);
+
+  
 
 }
 

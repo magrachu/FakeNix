@@ -29,7 +29,12 @@ DisplayLED_ &DisplayLED_::getInstance()
 void DisplayLED_::setup()
 {
     FastLED.addLeds<NEOPIXEL, DATA_PIN_LED_CLOCK>(nixieLed, NUM_LEDS_CLOCK);
-    SetRGB(CRGB::Blue,CRGB::Red);
+    SingleColor= CRGB::DarkOrange;
+    LeftColor=CRGB::Blue;
+    RightColor= CRGB::Red;
+    LightMode=LIGHT_MODE_SINGLE;
+    UpdateColor();
+ 
     
 }
 
@@ -60,6 +65,23 @@ void DisplayLED_::SetRGB(CRGB leftColor,CRGB rightColor)
     }
 }
 
+void DisplayLED_::UpdateColor()
+{
+    switch (LightMode)
+    {
+    case LIGHT_MODE_SINGLE:
+        SetRGB(SingleColor);
+        break;
+    case LIGHT_MODE_GRADIENT:
+        SetRGB(LeftColor,RightColor);
+        break;
+    case LIGHT_MODE_RAINBOW:
+        break;
+    default:
+        break;
+    }
+}
+
 void DisplayLED_::PrintColorToSerial(CRGB color){
     Serial.println("R: "+String(color.r) + " G: "+ String(color.g) + " B: "+ String(color.b));
 
@@ -68,6 +90,7 @@ void DisplayLED_::PrintColorToSerial(CRGB color){
 void DisplayLED_::SetBrightness(uint8_t brightness)
 {
     brightness_ = brightness;
+    UpdateColor();
 }
 
 CRGB DisplayLED_::GetRGB(uint8_t halfDigitIndex)
@@ -167,10 +190,11 @@ CRGB DisplayLED_::Mired2RGB(uint16_t mired)
 void DisplayLED_::SetColorTemperature(uint16_t temperature)
 {
     CRGB tempCol=Mired2RGB(temperature);
-    for (uint8_t i = 0; i < NUM_HALF_DIGIT; i++)
-    {
-        halfDigitColor_[i]= tempCol;
-    }
+    SetRGB(tempCol);
+    // for (uint8_t i = 0; i < NUM_HALF_DIGIT; i++)
+    // {
+    //     halfDigitColor_[i]= tempCol;
+    // }
     
 }
 
