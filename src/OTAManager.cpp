@@ -1,5 +1,6 @@
 #include <OTAManager.h>
 #include <ArduinoOTA.h>
+#include "SettingsManager.h"
 
 OTAManager_ &OTAManager_::getInstance()
 {
@@ -39,7 +40,7 @@ void OTAManager_::setup()
       } else if (error == OTA_END_ERROR) {
         Serial.println("End Failed");
       } });
-  ArduinoOTA.setHostname("ElekstubeR");
+  ArduinoOTA.setHostname(S_MDNS_HOSTNAME.c_str());
   ArduinoOTA.begin();
 }
 
