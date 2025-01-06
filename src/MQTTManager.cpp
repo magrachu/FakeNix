@@ -13,6 +13,8 @@ HALight light("digitLight", HALight::BrightnessFeature | HALight::ColorTemperatu
 HALight lightLeft("leftSideColor", HALight::BrightnessFeature | HALight::RGBFeature);
 HALight lightRight("rightSideColor", HALight::BrightnessFeature | HALight::RGBFeature);
 HASelect lightMode("lightMode");
+HANumber rainbowDuration("RainbowDuration", HANumber::PrecisionP2);
+HANumber rainbowOffset("RainbowOffset", HANumber::PrecisionP0);
 
 int tickCounter = 0;
 char _username[MQTT_STRING_LENGTH];
@@ -147,6 +149,26 @@ void onSelectCommand(int8_t index, HASelect *sender)
   }
 }
 
+void onNumberCommand(HANumeric number, HANumber* sender)
+{
+    if (!number.isSet()) {
+        // the reset command was send by Home Assistant
+    } else {
+      if (sender == &rainbowDuration)
+      {
+        DisplayLED.rainbowDuration=number.toFloat();
+      }
+      if (sender == &rainbowOffset)
+      {
+        DisplayLED.rainbowOffset=(uint8_t)((float)255*number.toFloat()/360);
+      }
+      
+   
+    }
+
+    sender->setState(number); // report the selected option back to the HA panel
+}
+
 void MQTTManager_::setup(byte *uniqueId, uint8_t uidLength)
 {
 
@@ -176,7 +198,7 @@ void MQTTManager_::setup(byte *uniqueId, uint8_t uidLength)
   light.onBrightnessCommand(onBrightnessCommand);
   light.onColorTemperatureCommand(onColorTemperatureCommand);
   light.onRGBColorCommand(onRGBColorCommand);
-
+light.setOptimistic(true);
 lightLeft.onStateCommand(onStateCommand);
   lightLeft.onBrightnessCommand(onBrightnessCommand);
   lightLeft.onColorTemperatureCommand(onColorTemperatureCommand);
@@ -208,6 +230,24 @@ lightLeft.onStateCommand(onStateCommand);
   lightMode.setCurrentState(0);
   lightMode.setIcon("mdi:home");   // optional
   lightMode.setName("Light mode"); // optional
+
+  rainbowDuration.setName("Rainbow duration");
+  rainbowDuration.setMode(HANumber::ModeSlider);
+  rainbowDuration.setCurrentState((float)10.0);
+  rainbowDuration.setMin(0.1);
+  rainbowDuration.setMax(100);
+  rainbowDuration.setStep(0.1);
+rainbowDuration.setUnitOfMeasurement("s");
+  rainbowDuration.onCommand(onNumberCommand);
+rainbowOffset.setName("Rainbow offset");
+  rainbowOffset.setMode(HANumber::ModeSlider);
+  //rainbowOffset.setCurrentState((int)0);
+  rainbowOffset.setStep(1);
+  rainbowOffset.setMin(0);
+  rainbowOffset.setMax(360);
+  rainbowOffset.setUnitOfMeasurement("°");
+
+  rainbowOffset.onCommand(onNumberCommand);
 }
 
 void MQTTManager_::connect(String servername, String username, String password)

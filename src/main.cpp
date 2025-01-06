@@ -27,7 +27,7 @@
 
 WiFiUDP ntpUDP;
 
-
+int delayTime=10;
 
 CRGB internalLed[NUM_LEDS_INTERNAL];
 char deviceIdentifierSuffix[DEVICE_IDENTIFIER_SUFFIX_LENGTH];
@@ -57,7 +57,7 @@ void setup()
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN_LED_INTERNAL>(internalLed, NUM_LEDS_INTERNAL);
   //FastLED.setCorrection(TypicalSMD5050);
-  FastLED.setCorrection(UncorrectedColor);
+  FastLED.setCorrection(TypicalSMD5050);
   internalLed[0] = CRGB::Red;
 
   FastLED.show();
@@ -120,8 +120,8 @@ void loop()
     break;
   }
 
-  DisplayLED.update();
+  DisplayLED.update(delayTime);
   FastLED.show();
 
-  delay(10);
+  delay(delayTime);
 }

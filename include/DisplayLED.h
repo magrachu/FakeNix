@@ -23,6 +23,8 @@ public:
     CRGB SingleColor;
     CRGB LeftColor;
     CRGB RightColor;
+    float rainbowDuration = 5; // 20seconds for a wheel rotation
+    uint8_t rainbowOffset = 45;
     void UpdateColor();
     void SetState(bool state);
     void SetRGB(CRGB color);
@@ -35,7 +37,7 @@ public:
     void SetPasscode(int passcode);
     void PrintColorToSerial(CRGB color);
     void clear();
-    void update();
+    void update(int interval);
 };
 extern DisplayLED_ &DisplayLED;
 
