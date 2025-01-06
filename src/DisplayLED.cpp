@@ -29,6 +29,7 @@ DisplayLED_ &DisplayLED_::getInstance()
 void DisplayLED_::setup()
 {
     FastLED.addLeds<NEOPIXEL, DATA_PIN_LED_CLOCK>(nixieLed, NUM_LEDS_CLOCK);
+    
     SingleColor= CRGB::DarkOrange;
     LeftColor=CRGB::Blue;
     RightColor= CRGB::Red;

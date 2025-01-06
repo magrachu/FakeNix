@@ -56,7 +56,8 @@ void setup()
   SettingsManager.printToSerial();
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN_LED_INTERNAL>(internalLed, NUM_LEDS_INTERNAL);
-  FastLED.setCorrection(TypicalSMD5050);
+  //FastLED.setCorrection(TypicalSMD5050);
+  FastLED.setCorrection(UncorrectedColor);
   internalLed[0] = CRGB::Red;
 
   FastLED.show();
