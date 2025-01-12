@@ -28,5 +28,6 @@ extern String S_MQTT_PASS;
 extern String S_MQTT_DATA_PREFIX;
 extern String S_MQTT_HA_DISCOVERY_PREFIX;
 extern String S_MDNS_HOSTNAME;
+extern String S_TIMEZONE;
 
 #endif

@@ -10,10 +10,10 @@
 #include <WiFiUdp.h>
 
 #include <WiFi.h>
-#include <NTPClient.h>
+//#include <NTPClient.h>
 #include <ArduinoHA.h>
 #include <ESPmDNS.h>
-
+#include <time.h>
 
 #include <Preferences.h>
 
@@ -34,7 +34,12 @@ char deviceIdentifierSuffix[DEVICE_IDENTIFIER_SUFFIX_LENGTH];
 
 // By default 'pool.ntp.org' is used with 60 seconds update interval and
 // no offset
-NTPClient timeClient(ntpUDP, 3600);
+//NTPClient timeClient(ntpUDP, 3600);
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 0;
+const int   daylightOffset_sec = 3600;
+struct tm timeinfo;
+
 
 void setup()
 {
@@ -45,7 +50,7 @@ void setup()
   
   
   Serial.begin(115200);
-  delay(5000);
+  delay(500);
   
   Serial.println("FakeNixie setup");
 
@@ -83,19 +88,24 @@ void setup()
   }
 
   FastLED.show();
-
+  // Init and get the time
+  configTime(0, 0, ntpServer);
+  setenv("TZ",S_TIMEZONE.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  tzset();
+  
 
   
 
-  timeClient.begin();
+  //timeClient.begin();
   WebserverManager.setup();
 }
 
 void loop()
 {
-  int hours = timeClient.getHours();
-  int minutes = timeClient.getMinutes();
-  int seconds = timeClient.getSeconds();
+  getLocalTime(&timeinfo);
+  int hours = timeinfo.tm_hour;
+  int minutes = timeinfo.tm_min;
+  int seconds = timeinfo.tm_sec;
 
   switch (WifiManager.getMode())
   {
@@ -110,7 +120,7 @@ void loop()
     internalLed[0] = CRGB::Green;
     MQTTManager.tick();
     OTAManager.tick();
-    timeClient.update();
+    //timeClient.update();
   
     // Serial.println(timeClient.getFormattedTime());
 

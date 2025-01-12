@@ -11,7 +11,7 @@ const char *PARAM_INPUT_MQTT_USER = "inputMqttUser";
 const char *PARAM_INPUT_MQTT_PASS = "inputMqttPass";
 const char *PARAM_INPUT_MQTT_DATA_PREFIX = "inputMqttDataPrefix";
 const char *PARAM_INPUT_MQTT_HA_PREFIX = "inputMqttHaAutoDiscoveryPrefix";
-
+const char *PARAM_INPUT_TIMEZONE = "inputTimezone";
 
 
 
@@ -65,6 +65,11 @@ String processor(const String &var)
     {
         return String(S_MQTT_HA_DISCOVERY_PREFIX);
     }
+    else if (var =="TMPL_TIMEZONE")
+    {
+        return String(S_TIMEZONE);
+    }
+    
 
  
     return String();
@@ -179,6 +184,12 @@ void WebserverManager_::setup()
                     S_MQTT_HA_DISCOVERY_PREFIX= request->getParam(PARAM_INPUT_MQTT_HA_PREFIX)->value();
 
                   }
+                  if (request->hasParam(PARAM_INPUT_TIMEZONE))
+                  {
+                    S_TIMEZONE= request->getParam(PARAM_INPUT_TIMEZONE)->value();
+                    setenv("TZ",S_TIMEZONE.c_str(),1);
+                  }
+                  
                   
                   SettingsManager.save();
                   request->send(200, "text/html", "Settings saved, device will reboot");

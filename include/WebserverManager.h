@@ -89,6 +89,10 @@ const char index_html[] PROGMEM = R"rawliteral(
                         <td>MQTT HA autodiscovery prefix (usually "homeassistant")</td>
                         <td><input type="value" value="%TMPL_MQTT_HA_PREFIX%" name="inputMqttHaAutoDiscoveryPrefix"></td>
                     </tr>
+                    <tr>
+                        <td>Timezone in <a href="https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv">POSIX format </a> </td>
+                        <td><input type="value" value="%TMPL_TIMEZONE%" name="inputTimezone"></td>
+                    </tr>
                 </table>
                
                 <input type="submit" value="Save Settings and Reboot"><br>
@@ -121,4 +125,5 @@ extern String S_MQTT_USER;
 extern String S_MQTT_PASS;
 extern String S_MQTT_HA_DISCOVERY_PREFIX;
 extern String S_MDNS_HOSTNAME;
+extern String S_TIMEZONE;
 #endif
