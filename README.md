@@ -16,7 +16,7 @@ More info about power consumption [here at adafruit](https://learn.adafruit.com/
 
 
 ## Startup
-After the first start, a basic Wifi-AP with a name prefix "Elekstube-R_" is provided. 
+After the first start, a basic Wifi-AP ( with a name "Elekstube-R_" plus a part of its MAC address) is generated. 
 To provide some level of safety, a random password suffix is generated on each boot and displayed as digits on the clock itself.
 If the clock displays the number "123456", then the ap passcode is "password123456"
 
