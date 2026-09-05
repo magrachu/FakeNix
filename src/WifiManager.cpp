@@ -48,6 +48,8 @@ void WifiManager_::begin()
             break;
         case WL_CONNECTED:
             targetWifiMode = WIFIMANAGER_MODE_CONNECTED;
+            WiFi.setAutoReconnect(true);
+
             setupLoopBusy = false;
             break;
         default:
